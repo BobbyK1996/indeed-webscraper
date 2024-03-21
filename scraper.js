@@ -24,10 +24,17 @@ async function scrapeIndeed() {
   await page.waitForSelector('#text-input-where');
   await page.click('#text-input-where');
   await page.keyboard.type(location, { delay: 100 });
-  await waitForTimeout(1000);
+  await waitForTimeout(500);
   await page.keyboard.press('ArrowDown');
-  await waitForTimeout(1000);
+  await waitForTimeout(500);
   await page.keyboard.press('Enter');
+
+  //click the search button
+  await page.waitForSelector('.css-169igj0.eu4oa1w0 button');
+  await page.click('.css-169igj0.eu4oa1w0 button');
+
+  //let the navigation complete
+  await page.waitForNavigation();
 
   // await browser.close();
 
