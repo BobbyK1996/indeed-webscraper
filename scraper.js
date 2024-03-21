@@ -17,12 +17,13 @@ async function scrapeIndeed() {
   //type job title
   await page.waitForSelector('#text-input-what');
   await page.click('#text-input-what');
-  await page.keyboard.type('#text-input-what', jobTitle, { delay: 100 });
+  await waitForTimeout(1000);
+  await page.keyboard.type(jobTitle, { delay: 100 });
 
   //type and select location
   await page.waitForSelector('#text-input-where');
   await page.click('#text-input-where');
-  await page.keyboard.type('#text-input-where', location, { delay: 100 });
+  await page.keyboard.type(location, { delay: 100 });
   // await waitForTimeout(1000);
   // await page.keyboard.press('ArrowDown');
   // await waitForTimeout(1000);
