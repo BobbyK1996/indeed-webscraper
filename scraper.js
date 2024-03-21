@@ -33,12 +33,53 @@ async function scrapeIndeed() {
   await page.waitForSelector('.css-169igj0.eu4oa1w0 button');
   await page.click('.css-169igj0.eu4oa1w0 button');
 
-  //let the navigation complete
-  await page.waitForNavigation();
+  try {
+    //let the navigation complete
+    await page.waitForNavigation();
 
-  // await browser.close();
+    await page.waitForSelector('.css-5lfssm.eu4oa1w0', { timeout: 60000 });
 
-  console.log('Working');
+    //extract job listings
+    const jobListings = await page.evaluate(() => {
+      const listings = [];
+      const jobs =
+        document.querySelectorAll('li.css-5lfssm.eu4oa1w0').length > 1
+          ? [...document.querySelectorAll('li.css-5lfssm.eu4oa1w0')].slice(
+              0,
+              -1
+            )
+          : [];
+
+      for (const job of jobs) {
+        //click on the job
+        const firstAnchor = job.querySelector('a');
+        firstAnchor.click();
+
+        //wait for job info to load
+        page.waitForSelector('.jobsearch-JobInfoHeader-title span');
+
+        //extract info
+        const title = job.querySelector(
+          '.jobsearch-JobInfoHeader-title span'
+        ).innerText;
+        const company = job.querySelector('.css-1cxc9zk.e1wnkr790 a').innerText;
+        const location = job.querySelector(
+          '.css-17cdm7w.eu4oa1w0 div'
+        ).innerText;
+
+        listings.push({ title, company, location });
+      }
+
+      return listings;
+    });
+    console.log(jobListings);
+  } catch (error) {
+    console.log(`error: ${error}`);
+  } finally {
+    await browser.close();
+  }
 }
 
 scrapeIndeed();
+
+// await browser.close();
