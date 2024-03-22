@@ -37,7 +37,7 @@ async function scrapeIndeed() {
     //let the navigation complete
     await page.waitForNavigation();
 
-    await page.waitForSelector('.css-5lfssm.eu4oa1w0', { timeout: 60000 });
+    await page.waitForSelector('.css-5lfssm.eu4oa1w0 a', { timeout: 60000 });
 
     //extract job listings
     const jobListings = await page.evaluate(() => {
@@ -51,53 +51,21 @@ async function scrapeIndeed() {
           : [];
 
       //iterate over jobs
-      const promises = jobs.map((job) => {
-        return new Promise((resolve) => {
-          //click on the job
-          const firstAnchor = job.querySelector('a');
-          firstAnchor.click();
+      const regex = /data-jk="([^"]+)"/;
 
-          setTimeout(() => {
-            //extract info
-            const title = job.querySelector(
-              '.jobsearch-JobInfoHeader-title span'
-            ).innerText;
-            const company = job.querySelector(
-              '.css-1cxc9zk.e1wnkr790 a'
-            ).innerText;
-            const location = job.querySelector(
-              '.css-17cdm7w.eu4oa1w0 div'
-            ).innerText;
+      jobs.forEach((job) => {
+        const htmlString = job.innerHTML;
 
-            listings.push({ title, company, location });
-            resolve();
-          }, 1000);
-        });
+        const match = htmlString.match(regex);
+
+        const extractedString = match ? match[1] : null;
+
+        if (extractedString) {
+          const urlLink = `https://uk.indeed.com/viewjob?jk=${extractedString}`;
+          listings.push(urlLink);
+        }
       });
-
-      return Promise.all(promises).then(() => listings);
-
-      // for (const job of jobs) {
-      //   //click on the job
-      //   const firstAnchor = job.querySelector('a');
-      //   firstAnchor.click();
-
-      //   //wait for job info to load
-      //   page.waitForSelector('.jobsearch-JobInfoHeader-title span');
-
-      //   //extract info
-      //   const title = job.querySelector(
-      //     '.jobsearch-JobInfoHeader-title span'
-      //   ).innerText;
-      //   const company = job.querySelector('.css-1cxc9zk.e1wnkr790 a').innerText;
-      //   const location = job.querySelector(
-      //     '.css-17cdm7w.eu4oa1w0 div'
-      //   ).innerText;
-
-      //   listings.push({ title, company, location });
-      // }
-
-      // return listings;
+      return listings;
     });
     console.log(jobListings);
   } catch (error) {
