@@ -50,54 +50,27 @@ async function scrapeIndeed() {
             )
           : [];
 
-      //iterate over jobs
-      const promises = jobs.map((job) => {
-        return new Promise((resolve) => {
-          //click on the job
-          const firstAnchor = job.querySelector('a');
-          firstAnchor.click();
+      for (const job of jobs) {
+        //click on the job
+        const firstAnchor = job.querySelector('a');
+        firstAnchor.click();
 
-          setTimeout(() => {
-            //extract info
-            const title = job.querySelector(
-              '.jobsearch-JobInfoHeader-title span'
-            ).innerText;
-            const company = job.querySelector(
-              '.css-1cxc9zk.e1wnkr790 a'
-            ).innerText;
-            const location = job.querySelector(
-              '.css-17cdm7w.eu4oa1w0 div'
-            ).innerText;
+        //wait for job info to load
+        page.waitForSelector('.jobsearch-JobInfoHeader-title span');
 
-            listings.push({ title, company, location });
-            resolve();
-          }, 1000);
-        });
-      });
+        //extract info
+        const title = job.querySelector(
+          '.jobsearch-JobInfoHeader-title span'
+        ).innerText;
+        const company = job.querySelector('.css-1cxc9zk.e1wnkr790 a').innerText;
+        const location = job.querySelector(
+          '.css-17cdm7w.eu4oa1w0 div'
+        ).innerText;
 
-      return Promise.all(promises).then(() => listings);
+        listings.push({ title, company, location });
+      }
 
-      // for (const job of jobs) {
-      //   //click on the job
-      //   const firstAnchor = job.querySelector('a');
-      //   firstAnchor.click();
-
-      //   //wait for job info to load
-      //   page.waitForSelector('.jobsearch-JobInfoHeader-title span');
-
-      //   //extract info
-      //   const title = job.querySelector(
-      //     '.jobsearch-JobInfoHeader-title span'
-      //   ).innerText;
-      //   const company = job.querySelector('.css-1cxc9zk.e1wnkr790 a').innerText;
-      //   const location = job.querySelector(
-      //     '.css-17cdm7w.eu4oa1w0 div'
-      //   ).innerText;
-
-      //   listings.push({ title, company, location });
-      // }
-
-      // return listings;
+      return listings;
     });
     console.log(jobListings);
   } catch (error) {
@@ -108,3 +81,5 @@ async function scrapeIndeed() {
 }
 
 scrapeIndeed();
+
+// await browser.close();
