@@ -4,10 +4,17 @@ async function waitForTimeout(timeout) {
   return new Promise((resolve) => setTimeout(resolve, timeout));
 }
 
-async function scrapeIndeed() {
+// async function scrapePage(url, listings) {
+//   const pageDetailed = await browser.newPage();
+//   await pageDetailed.goto(url);
+//   listings.push(urlLink);
+// }
+
+async function scrapeLinks() {
   //initialise puppeteer headless browser and navigate
   const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
+  // await page.exposeFunction('scrapePage', scrapePage);
   await page.goto('https://uk.indeed.com/');
 
   //define parameters
@@ -75,4 +82,4 @@ async function scrapeIndeed() {
   }
 }
 
-scrapeIndeed();
+scrapeLinks();

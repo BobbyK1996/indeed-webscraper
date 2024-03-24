@@ -81,5 +81,3 @@ async function scrapeIndeed() {
 }
 
 scrapeIndeed();
-
-// await browser.close();
