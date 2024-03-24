@@ -4,12 +4,6 @@ async function waitForTimeout(timeout) {
   return new Promise((resolve) => setTimeout(resolve, timeout));
 }
 
-// async function scrapePage(url, listings) {
-//   const pageDetailed = await browser.newPage();
-//   await pageDetailed.goto(url);
-//   listings.push(urlLink);
-// }
-
 async function scrapeLinks() {
   //initialise puppeteer headless browser and navigate
   const browser = await puppeteer.launch({ headless: false });
@@ -69,15 +63,34 @@ async function scrapeLinks() {
 
         if (extractedString) {
           const urlLink = `https://uk.indeed.com/viewjob?jk=${extractedString}`;
-          browser.newPage().then(async (newPage) => {
-            await newPage.goto(urlLink);
-          });
           listings.push(urlLink);
         }
       });
       return listings;
     });
-    console.log(jobListings);
+
+    // console.log(jobListings);
+
+    const leadObjects = [];
+
+    for (const link of jobListings) {
+      const newPage = await browser.newPage();
+      await newPage.goto(link);
+
+      await newPage.waitForSelector('#jobDescriptionText');
+
+      const lead = await newPage.evaluate((link) => {
+        const title = document.querySelector(
+          '.jobsearch-JobInfoHeader-title span'
+        ).innerText;
+
+        return { title, link };
+      }, link);
+
+      leadObjects.push(lead);
+    }
+
+    console.log(leadObjects);
   } catch (error) {
     console.log(`error: ${error}`);
   } finally {
