@@ -69,6 +69,9 @@ async function scrapeLinks() {
 
         if (extractedString) {
           const urlLink = `https://uk.indeed.com/viewjob?jk=${extractedString}`;
+          browser.newPage().then(async (newPage) => {
+            await newPage.goto(urlLink);
+          });
           listings.push(urlLink);
         }
       });
