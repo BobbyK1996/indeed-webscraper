@@ -114,3 +114,28 @@ async function scrapeLinks() {
 const data = await scrapeLinks();
 
 console.log(data);
+
+import fs from 'fs';
+import path from 'path';
+import XLSX from 'xlsx';
+
+function writeToExcel(data, filePath) {
+  const workbook = XLSX.utils.book_new();
+  const worksheet = XLSX.utils.json_to_sheet(data);
+
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+
+  XLSX.writeFile(workbook, filePath, { bookType: 'xlsx', type: 'buffer' });
+}
+
+const directory = 'C:/Users/bobst/Desktop/newCode/webscrapers/excel-files';
+const fileName = 'output.xlsx';
+const filePath = path.join(directory, fileName);
+
+if (!fs.existsSync(directory)) {
+  fs.mkdirSync(directory, { recursive: true });
+}
+
+writeToExcel(data, filePath);
+
+console.log(`Excel file "${filePath}" created successfully.`);
