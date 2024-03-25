@@ -19,15 +19,15 @@ async function scrapeLinks() {
   await page.waitForSelector('#text-input-what');
   await page.click('#text-input-what');
   await waitForTimeout(1000);
-  await page.keyboard.type(jobTitle, { delay: 100 });
+  await page.keyboard.type(jobTitle, { delay: 50 });
 
   //type and select location
   await page.waitForSelector('#text-input-where');
   await page.click('#text-input-where');
-  await page.keyboard.type(location, { delay: 100 });
+  await page.keyboard.type(location, { delay: 50 });
   await waitForTimeout(500);
   await page.keyboard.press('ArrowDown');
-  await waitForTimeout(500);
+  await waitForTimeout(300);
   await page.keyboard.press('Enter');
 
   //click the search button
@@ -84,13 +84,26 @@ async function scrapeLinks() {
           '.jobsearch-JobInfoHeader-title span'
         ).innerText;
 
-        return { title, link };
+        const jobLocation =
+          document.querySelector('#jobLocationText').innerText;
+
+        const salaryInfo = document.querySelector(
+          '#salaryInfoAndJobType'
+        ).innerText;
+
+        const jobDescription = document.querySelector(
+          '#jobDescriptionText'
+        ).innerText;
+
+        // return { title, link, jobLocation, salaryInfo };
+        return { title, jobLocation, salaryInfo, jobDescription, link };
       }, link);
 
       leadObjects.push(lead);
     }
 
-    console.log(leadObjects);
+    // console.log(leadObjects);
+    return leadObjects;
   } catch (error) {
     console.log(`error: ${error}`);
   } finally {
@@ -98,4 +111,6 @@ async function scrapeLinks() {
   }
 }
 
-scrapeLinks();
+const data = await scrapeLinks();
+
+console.log(data);
