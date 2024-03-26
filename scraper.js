@@ -71,8 +71,14 @@ async function scrapeLinks() {
       });
       scrapedJobs.push(jobListings);
 
-      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-      // await page.click('.css-akkh0a.e8ju0x50');
+      await page.evaluate(() =>
+        window.scrollTo({
+          top: document.body.scrollHeight,
+          left: 0,
+          behavior: 'smooth',
+        })
+      );
+      // await page.click('[aria-label="Next Page"]');
     }
 
     return scrapedJobs;
