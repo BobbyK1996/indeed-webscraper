@@ -1,5 +1,10 @@
 import puppeteer from 'puppeteer';
 
+//define parameters
+const jobTitle = 'Web Developer';
+const location = 'London';
+const numberOfLeads = 45;
+
 async function waitForTimeout(timeout) {
   return new Promise((resolve) => setTimeout(resolve, timeout));
 }
@@ -10,10 +15,6 @@ async function scrapeLinks() {
   const page = await browser.newPage();
   // await page.exposeFunction('scrapePage', scrapePage);
   await page.goto('https://uk.indeed.com/');
-
-  //define parameters
-  const jobTitle = 'Web Developer';
-  const location = 'London';
 
   //type job title
   await page.waitForSelector('#text-input-what');
@@ -34,76 +35,99 @@ async function scrapeLinks() {
   await page.waitForSelector('.css-169igj0.eu4oa1w0 button');
   await page.click('.css-169igj0.eu4oa1w0 button');
 
+  //Number of leads calc
+  const numberOfPages = Math.ceil(numberOfLeads / 15);
+
   try {
-    //let the navigation complete
-    await page.waitForNavigation();
+    //loop through the number of pages
+    const scrapedJobs = [];
+    for (let i = 0; i < numberOfPages; i++) {
+      //let navigation complete
+      await page.waitForNavigation();
+      await page.waitForSelector('.css-5lfssm.eu4oa1w0 a', { timeout: 60000 });
 
-    await page.waitForSelector('.css-5lfssm.eu4oa1w0 a', { timeout: 60000 });
+      //extract job listings
+      const jobListings = await page.evaluate(() => {
+        const listings = [];
+        const jobs =
+          document.querySelectorAll('li.css-5lfssm.eu4oa1w0').length > 1
+            ? [...document.querySelectorAll('li.css-5lfssm.eu4oa1w0')].slice(
+                0,
+                -1
+              )
+            : [];
 
-    //extract job listings
-    const jobListings = await page.evaluate(() => {
-      const listings = [];
-      const jobs =
-        document.querySelectorAll('li.css-5lfssm.eu4oa1w0').length > 1
-          ? [...document.querySelectorAll('li.css-5lfssm.eu4oa1w0')].slice(
-              0,
-              -1
-            )
-          : [];
-
-      //iterate over jobs
-      const regex = /data-jk="([^"]+)"/;
-
-      jobs.forEach((job) => {
-        const htmlString = job.innerHTML;
-
-        const match = htmlString.match(regex);
-
-        const extractedString = match ? match[1] : null;
-
-        if (extractedString) {
-          const urlLink = `https://uk.indeed.com/viewjob?jk=${extractedString}`;
-          listings.push(urlLink);
-        }
+        const regex = /data-jk="([^"]+)"/;
+        jobs.forEach((job) => {
+          const htmlString = job.innerHTML;
+          const match = htmlString.match(regex);
+          const extractedString = match ? match[1] : null;
+          if (extractedString) {
+            const urlLink = `https://uk.indeed.com/viewjob?jk=${extractedString}`;
+            listings.push(urlLink);
+          }
+        });
+        return listings;
       });
-      return listings;
-    });
+      scrapedJobs.push(jobListings);
 
-    // console.log(jobListings);
-
-    const leadObjects = [];
-
-    for (const link of jobListings) {
-      const newPage = await browser.newPage();
-      await newPage.goto(link);
-
-      await newPage.waitForSelector('#jobDescriptionText');
-
-      const lead = await newPage.evaluate((link) => {
-        const title = document.querySelector(
-          '.jobsearch-JobInfoHeader-title span'
-        ).innerText;
-
-        const jobLocation =
-          document.querySelector('#jobLocationText').innerText;
-
-        const salaryInfo = document.querySelector(
-          '#salaryInfoAndJobType'
-        ).innerText;
-
-        const jobDescription = document.querySelector(
-          '#jobDescriptionText'
-        ).innerText;
-
-        // return { title, link, jobLocation, salaryInfo };
-        return { title, jobLocation, salaryInfo, jobDescription, link };
-      }, link);
-
-      leadObjects.push(lead);
+      await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+      // await page.click('.css-akkh0a.e8ju0x50');
     }
 
-    // console.log(leadObjects);
-    return leadObjects;
+    return scrapedJobs;
+
+    //   //let the navigation complete
+    //   await page.waitForNavigation();
+    //   await page.waitForSelector('.css-5lfssm.eu4oa1w0 a', { timeout: 60000 });
+    //   //extract job listings
+    //   const jobListings = await page.evaluate(() => {
+    //     const listings = [];
+    //     const jobs =
+    //       document.querySelectorAll('li.css-5lfssm.eu4oa1w0').length > 1
+    //         ? [...document.querySelectorAll('li.css-5lfssm.eu4oa1w0')].slice(
+    //             0,
+    //             -1
+    //           )
+    //         : [];
+    //     //iterate over jobs
+    //     const regex = /data-jk="([^"]+)"/;
+    //     jobs.forEach((job) => {
+    //       const htmlString = job.innerHTML;
+    //       const match = htmlString.match(regex);
+    //       const extractedString = match ? match[1] : null;
+    //       if (extractedString) {
+    //         const urlLink = `https://uk.indeed.com/viewjob?jk=${extractedString}`;
+    //         listings.push(urlLink);
+    //       }
+    //     });
+    //     return listings;
+    //   });
+    //   // console.log(jobListings);
+    //   const leadObjects = [];
+    //   for (const link of jobListings) {
+    //     const newPage = await browser.newPage();
+    //     await newPage.goto(link);
+    //     await newPage.waitForSelector('#jobDescriptionText');
+    //     const lead = await newPage.evaluate((link) => {
+    //       const title = document.querySelector(
+    //         '.jobsearch-JobInfoHeader-title span'
+    //       ).innerText;
+    //       const jobLocation =
+    //         document.querySelector('#jobLocationText').innerText;
+    //       const salaryInfo = document.querySelector(
+    //         '#salaryInfoAndJobType'
+    //       ).innerText;
+    //       const jobDescription = document.querySelector(
+    //         '#jobDescriptionText'
+    //       ).innerText;
+    //       // return { title, link, jobLocation, salaryInfo };
+    //       return { title, jobLocation, salaryInfo, jobDescription, link };
+    //     }, link);
+    //     leadObjects.push(lead);
+    //   }
+    //   // console.log(leadObjects);
+    //   return leadObjects;
   } catch (error) {
     console.log(`error: ${error}`);
   } finally {
@@ -136,6 +160,6 @@ if (!fs.existsSync(directory)) {
   fs.mkdirSync(directory, { recursive: true });
 }
 
-writeToExcel(data, filePath);
+// writeToExcel(data, filePath);
 
 console.log(`Excel file "${filePath}" created successfully.`);
