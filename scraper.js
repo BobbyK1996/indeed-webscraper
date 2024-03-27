@@ -5,7 +5,7 @@ const jobTitle = 'Web Developer';
 // const jobTitle = 'c++ developer mobile';
 // const jobTitle = 'gufhidsuiofdsuf';
 const location = 'London';
-const numberOfLeads = 60;
+const numberOfLeads = 10;
 
 async function waitForTimeout(timeout) {
   return new Promise((resolve) => setTimeout(resolve, timeout));
@@ -56,7 +56,6 @@ async function scrapeLinks() {
       });
       const hasJobsValue = JSON.parse(JSON.stringify(hasJobs));
       // const hasJobsValue = false;
-      console.log(hasJobsValue);
 
       if (!hasJobsValue) {
         break;
@@ -118,42 +117,45 @@ async function scrapeLinks() {
       }
     }
 
+    await browser.close();
+
     // return scrapedLinks;
     const flattenedScrapedLinks = scrapedLinks.reduce(
       (acc, curr) => acc.concat(curr),
       []
     );
 
-    return flattenedScrapedLinks;
+    const leadObjects = [];
 
-    //   const leadObjects = [];
-    //   for (const link of jobListings) {
-    //     const newPage = await browser.newPage();
-    //     await newPage.goto(link);
-    //     await newPage.waitForSelector('#jobDescriptionText');
-    //     const lead = await newPage.evaluate((link) => {
-    //       const title = document.querySelector(
-    //         '.jobsearch-JobInfoHeader-title span'
-    //       ).innerText;
-    //       const jobLocation =
-    //         document.querySelector('#jobLocationText').innerText;
-    //       const salaryInfo = document.querySelector(
-    //         '#salaryInfoAndJobType'
-    //       ).innerText;
-    //       const jobDescription = document.querySelector(
-    //         '#jobDescriptionText'
-    //       ).innerText;
-    //       // return { title, link, jobLocation, salaryInfo };
-    //       return { title, jobLocation, salaryInfo, jobDescription, link };
-    //     }, link);
-    //     leadObjects.push(lead);
-    //   }
-    //   // console.log(leadObjects);
-    //   return leadObjects;
+    const newBrowser = await puppeteer.launch({ headless: false });
+
+    for (const link of flattenedScrapedLinks) {
+      const newPage = await newBrowser.newPage();
+      await newPage.goto(link);
+      await newPage.waitForSelector('#jobDescriptionText');
+      const lead = await newPage.evaluate((link) => {
+        const title = document.querySelector(
+          '.jobsearch-JobInfoHeader-title span'
+        ).innerText;
+        const jobLocation =
+          document.querySelector('#jobLocationText').innerText;
+        const salaryInfo = document.querySelector(
+          '#salaryInfoAndJobType'
+        ).innerText;
+        const jobDescription = document.querySelector(
+          '#jobDescriptionText'
+        ).innerText;
+        return { title, jobLocation, salaryInfo, jobDescription, link };
+      }, link);
+      leadObjects.push(lead);
+      newPage.close();
+    }
+
+    await newBrowser.close();
+
+    return leadObjects;
   } catch (error) {
     console.log('There were no jobs available for that query');
-  } finally {
-    await browser.close();
   }
 }
 
@@ -182,6 +184,6 @@ if (!fs.existsSync(directory)) {
   fs.mkdirSync(directory, { recursive: true });
 }
 
-// writeToExcel(data, filePath);
+writeToExcel(data, filePath);
 
-// console.log(`Excel file "${filePath}" created successfully.`);
+console.log(`Excel file "${filePath}" created successfully.`);
