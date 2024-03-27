@@ -2,6 +2,7 @@ import puppeteer from 'puppeteer';
 
 //define parameters
 const jobTitle = 'Web Developer';
+// const jobTitle = 'c++ developer mobile';
 // const jobTitle = 'gufhidsuiofdsuf';
 const location = 'London';
 const numberOfLeads = 60;
@@ -42,18 +43,20 @@ async function scrapeLinks() {
   try {
     //loop through the number of pages
     const scrapedLinks = [];
+
     for (let i = 0; i < numberOfPages; i++) {
       //let navigation complete
       await page.waitForNavigation();
-      // await page.waitForSelector('.css-5lfssm.eu4oa1w0 a', { timeout: 60000 });
+      await page.waitForSelector('.yosegi-InlineWhatWhere-primaryButton', {
+        timeout: 60000,
+      });
 
-      //check if there are any jobs
       const hasJobs = await page.evaluate(() => {
         return !!document.querySelector('li.css-5lfssm.eu4oa1w0');
       });
-
       const hasJobsValue = JSON.parse(JSON.stringify(hasJobs));
-      console.log('hello');
+      // const hasJobsValue = false;
+      console.log(hasJobsValue);
 
       if (!hasJobsValue) {
         break;
@@ -100,7 +103,7 @@ async function scrapeLinks() {
         });
       });
 
-      await waitForTimeout(3000);
+      // await waitForTimeout(3000);
 
       const hasNextPage = await page.evaluate(() => {
         return !!document.querySelector('[aria-label="Next Page"]');
@@ -123,37 +126,6 @@ async function scrapeLinks() {
 
     return flattenedScrapedLinks;
 
-    // const leadObjects = [];
-
-    // for (const link of scrap)
-
-    //   //let the navigation complete
-    //   await page.waitForNavigation();
-    //   await page.waitForSelector('.css-5lfssm.eu4oa1w0 a', { timeout: 60000 });
-    //   //extract job listings
-    //   const jobListings = await page.evaluate(() => {
-    //     const listings = [];
-    //     const jobs =
-    //       document.querySelectorAll('li.css-5lfssm.eu4oa1w0').length > 1
-    //         ? [...document.querySelectorAll('li.css-5lfssm.eu4oa1w0')].slice(
-    //             0,
-    //             -1
-    //           )
-    //         : [];
-    //     //iterate over jobs
-    //     const regex = /data-jk="([^"]+)"/;
-    //     jobs.forEach((job) => {
-    //       const htmlString = job.innerHTML;
-    //       const match = htmlString.match(regex);
-    //       const extractedString = match ? match[1] : null;
-    //       if (extractedString) {
-    //         const urlLink = `https://uk.indeed.com/viewjob?jk=${extractedString}`;
-    //         listings.push(urlLink);
-    //       }
-    //     });
-    //     return listings;
-    //   });
-    //   // console.log(jobListings);
     //   const leadObjects = [];
     //   for (const link of jobListings) {
     //     const newPage = await browser.newPage();
@@ -179,7 +151,7 @@ async function scrapeLinks() {
     //   // console.log(leadObjects);
     //   return leadObjects;
   } catch (error) {
-    console.log(`error: ${error}`);
+    console.log('There were no jobs available for that query');
   } finally {
     await browser.close();
   }
@@ -187,7 +159,7 @@ async function scrapeLinks() {
 
 const data = await scrapeLinks();
 
-console.log(data);
+console.log(data || 'No data');
 
 import fs from 'fs';
 import path from 'path';
@@ -212,4 +184,4 @@ if (!fs.existsSync(directory)) {
 
 // writeToExcel(data, filePath);
 
-console.log(`Excel file "${filePath}" created successfully.`);
+// console.log(`Excel file "${filePath}" created successfully.`);
