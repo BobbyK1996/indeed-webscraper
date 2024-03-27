@@ -1,7 +1,8 @@
 import puppeteer from 'puppeteer';
 
 //define parameters
-const jobTitle = 'Web Developer';
+// const jobTitle = 'Web Developer';
+const jobTitle = 'gufhidsuiofdsuf';
 const location = 'London';
 const numberOfLeads = 60;
 
@@ -40,11 +41,23 @@ async function scrapeLinks() {
 
   try {
     //loop through the number of pages
-    const scrapedJobs = [];
+    const scrapedLinks = [];
     for (let i = 0; i < numberOfPages; i++) {
       //let navigation complete
       await page.waitForNavigation();
-      await page.waitForSelector('.css-5lfssm.eu4oa1w0 a', { timeout: 60000 });
+      // await page.waitForSelector('.css-5lfssm.eu4oa1w0 a', { timeout: 60000 });
+
+      //check if there are any jobs
+      const hasJobs = await page.evaluate(() => {
+        return !!document.querySelector('li.css-5lfssm.eu4oa1w0');
+      });
+
+      const hasJobsValue = JSON.parse(JSON.stringify(hasJobs));
+      console.log('hello');
+
+      if (!hasJobsValue) {
+        break;
+      }
 
       //extract job listings
       const jobListings = await page.evaluate(() => {
@@ -69,7 +82,7 @@ async function scrapeLinks() {
         });
         return listings;
       });
-      scrapedJobs.push(jobListings);
+      scrapedLinks.push(jobListings);
 
       await page.evaluate(() => {
         const closeButton = document.querySelector(
@@ -86,10 +99,33 @@ async function scrapeLinks() {
           behavior: 'smooth',
         });
       });
-      await page.click('[aria-label="Next Page"]');
+
+      await waitForTimeout(3000);
+
+      const hasNextPage = await page.evaluate(() => {
+        return !!document.querySelector('[aria-label="Next Page"]');
+      });
+
+      const hasNextPageValue = JSON.parse(JSON.stringify(hasNextPage));
+
+      if (hasNextPageValue) {
+        await page.click('[aria-label="Next Page"]');
+      } else {
+        break;
+      }
     }
 
-    return scrapedJobs;
+    // return scrapedLinks;
+    const flattenedScrapedLinks = scrapedLinks.reduce(
+      (acc, curr) => acc.concat(curr),
+      []
+    );
+
+    return flattenedScrapedLinks;
+
+    // const leadObjects = [];
+
+    // for (const link of scrap)
 
     //   //let the navigation complete
     //   await page.waitForNavigation();
