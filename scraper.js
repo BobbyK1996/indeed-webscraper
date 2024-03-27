@@ -5,7 +5,7 @@ const jobTitle = 'Web Developer';
 // const jobTitle = 'c++ developer mobile';
 // const jobTitle = 'gufhidsuiofdsuf';
 const location = 'London';
-const numberOfLeads = 60;
+const numberOfLeads = 45;
 
 async function waitForTimeout(timeout) {
   return new Promise((resolve) => setTimeout(resolve, timeout));
@@ -117,7 +117,7 @@ async function scrapeLinks() {
       }
     }
 
-    await browser.close();
+    // await browser.close();
 
     // return scrapedLinks;
     const flattenedScrapedLinks = scrapedLinks.reduce(
@@ -127,10 +127,10 @@ async function scrapeLinks() {
 
     const leadObjects = [];
 
-    const newBrowser = await puppeteer.launch({ headless: false });
+    // const newBrowser = await puppeteer.launch({ headless: false });
 
     for (const link of flattenedScrapedLinks) {
-      const newPage = await newBrowser.newPage();
+      const newPage = await browser.newPage();
       await newPage.goto(link);
       await newPage.waitForSelector('#jobDescriptionText');
       const lead = await newPage.evaluate((link) => {
@@ -148,10 +148,10 @@ async function scrapeLinks() {
         return { title, jobLocation, salaryInfo, jobDescription, link };
       }, link);
       leadObjects.push(lead);
-      newPage.close();
+      // newPage.close();
     }
 
-    await newBrowser.close();
+    await browser.close();
 
     return leadObjects;
   } catch (error) {
@@ -184,6 +184,9 @@ if (!fs.existsSync(directory)) {
   fs.mkdirSync(directory, { recursive: true });
 }
 
-writeToExcel(data, filePath);
-
-console.log(`Excel file "${filePath}" created successfully.`);
+if (data) {
+  writeToExcel(data, filePath);
+  console.log(`Excel file ${filePath} created successfully`);
+} else {
+  console.log('No data to write to Excel file');
+}
