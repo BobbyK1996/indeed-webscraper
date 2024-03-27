@@ -5,7 +5,7 @@ const jobTitle = 'Web Developer';
 // const jobTitle = 'c++ developer mobile';
 // const jobTitle = 'gufhidsuiofdsuf';
 const location = 'London';
-const numberOfLeads = 10;
+const numberOfLeads = 60;
 
 async function waitForTimeout(timeout) {
   return new Promise((resolve) => setTimeout(resolve, timeout));
