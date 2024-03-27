@@ -1,8 +1,8 @@
 import puppeteer from 'puppeteer';
 
 //define parameters
-// const jobTitle = 'Web Developer';
-const jobTitle = 'gufhidsuiofdsuf';
+const jobTitle = 'Web Developer';
+// const jobTitle = 'gufhidsuiofdsuf';
 const location = 'London';
 const numberOfLeads = 60;
 
