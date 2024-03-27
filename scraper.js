@@ -3,7 +3,7 @@ import puppeteer from 'puppeteer';
 //define parameters
 const jobTitle = 'Web Developer';
 const location = 'London';
-const numberOfLeads = 45;
+const numberOfLeads = 60;
 
 async function waitForTimeout(timeout) {
   return new Promise((resolve) => setTimeout(resolve, timeout));
@@ -71,14 +71,22 @@ async function scrapeLinks() {
       });
       scrapedJobs.push(jobListings);
 
-      await page.evaluate(() =>
+      await page.evaluate(() => {
+        const closeButton = document.querySelector(
+          'button[aria-label="close"]'
+        );
+
+        if (closeButton) {
+          closeButton.click();
+        }
+
         window.scrollTo({
           top: document.body.scrollHeight,
           left: 0,
           behavior: 'smooth',
-        })
-      );
-      // await page.click('[aria-label="Next Page"]');
+        });
+      });
+      await page.click('[aria-label="Next Page"]');
     }
 
     return scrapedJobs;
